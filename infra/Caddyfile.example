@@ -1,0 +1,22 @@
+# Caddyfile — copy to `Caddyfile` next to docker-compose.prod.yml and
+# replace `app.example.com` with your domain. Caddy provisions TLS via
+# Let's Encrypt automatically the first time it starts.
+
+app.example.com {
+    encode gzip
+
+    # API & webhooks
+    handle_path /api/* {
+        reverse_proxy api:4000
+    }
+
+    # Next.js web app (catch-all)
+    handle {
+        reverse_proxy web:3000
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

@@ -1,0 +1,35 @@
+# Build artefacts & caches
+node_modules
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+**/*.tsbuildinfo
+
+# Local infra & state
+.git
+.github
+.vscode
+.idea
+infra/docker-compose.dev.yml
+**/Dockerfile
+**/.dockerignore
+
+# Env + secrets — never bake into images
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+# OS / editor noise
+.DS_Store
+**/.DS_Store
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Local uploads, plans, claude state
+uploads
+tmp
+.claude

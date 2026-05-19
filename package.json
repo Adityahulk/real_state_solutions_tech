@@ -1,0 +1,30 @@
+{
+  "name": "real-estate-solutions-tech",
+  "private": true,
+  "version": "0.0.1",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "db:migrate": "pnpm --filter @rest/db migrate",
+    "db:seed": "pnpm --filter @rest/db seed",
+    "db:studio": "pnpm --filter @rest/db studio",
+    "infra:up": "docker compose -f infra/docker-compose.dev.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.dev.yml down",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "prettier": "^3.3.3",
+    "turbo": "^2.1.3",
+    "typescript": "^5.6.2"
+  }
+}

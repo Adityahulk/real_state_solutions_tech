@@ -1,0 +1,19 @@
+{
+  "name": "Real Estate Builder — Engineer",
+  "short_name": "RE Engineer",
+  "description": "Site progress capture for builders",
+  "start_url": "/engineer",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1d4ed8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

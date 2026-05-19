@@ -1,0 +1,702 @@
+// Real Estate Builder Platform — database schema
+// Phase 0: foundational entities (users, RBAC, audit). Domain entities
+// (Site, Plot, Allotment, etc.) are scaffolded but minimal; later phases
+// flesh them out.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis, pgcrypto, citext]
+}
+
+// ============================================================
+// Identity & access
+// ============================================================
+
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique @db.Citext
+  passwordHash  String
+  displayName   String
+  phone         String?
+  isActive      Boolean  @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  roleAssignments  UserRoleAssignment[]
+  auditEntries     AuditLog[]            @relation("AuditActor")
+  sessions         AuthSession[]
+
+  // Domain links (kept optional — a single user can be both an admin and a plot owner)
+  personId         String?  @unique @db.Uuid
+  person           Person?  @relation(fields: [personId], references: [id])
+
+  @@index([isActive])
+}
+
+model AuthSession {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshHash  String   @unique
+  userAgent    String?
+  ip           String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ---------- RBAC ----------
+
+/// Catalogue of (subject, action) tuples the code knows about.
+/// Seeded from packages/shared-types/permissions.ts on every deploy —
+/// rows are *not* user-editable. Super Admin can compose Roles from these.
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  /// e.g. "Plot", "Role", "Payment"
+  subject     String
+  /// e.g. "read", "update", "allot", "approve", "manage"
+  action      String
+  /// Human label for the UI
+  label       String
+  description String?
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+
+  @@unique([subject, action])
+  @@index([subject])
+}
+
+model Role {
+  id           String   @id @default(uuid()) @db.Uuid
+  /// machine name; immutable after creation. e.g. "super_admin"
+  key          String   @unique
+  name         String
+  description  String?
+  /// true for the seeded roles shipped with the app
+  isBuiltIn    Boolean  @default(false)
+  /// super_admin is the only role with isImmutable=true; cannot be edited/deleted
+  isImmutable  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdById  String?  @db.Uuid
+
+  rolePermissions  RolePermission[]
+  userAssignments  UserRoleAssignment[]
+
+  @@index([isBuiltIn])
+}
+
+model RolePermission {
+  id            String     @id @default(uuid()) @db.Uuid
+  roleId        String     @db.Uuid
+  role          Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId  String     @db.Uuid
+  permission    Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  /// Optional row-level CASL conditions. Variables prefixed with "$user"
+  /// are substituted at compile time, e.g. `{ "siteId": { "$in": "$user.assignedSiteIds" } }`.
+  conditions    Json?
+
+  createdAt     DateTime   @default(now())
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model UserRoleAssignment {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId    String   @db.Uuid
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  /// Optional scope. null = applies everywhere; otherwise narrows by site/plot/etc.
+  /// e.g. { "siteIds": ["uuid", "uuid"] } or { "plotIds": ["uuid"] }
+  scope     Json?
+  createdAt DateTime @default(now())
+  createdBy String?  @db.Uuid
+
+  @@unique([userId, roleId, scope])
+  @@index([userId])
+  @@index([roleId])
+}
+
+// ---------- Audit ----------
+
+/// Append-only. Every mutating controller writes here via an interceptor.
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorId     String?  @db.Uuid
+  actor       User?    @relation("AuditActor", fields: [actorId], references: [id])
+  /// e.g. "Plot", "Role", "Allotment"
+  entityType  String
+  /// id of the affected row (uuid stringified)
+  entityId    String
+  /// e.g. "create", "update", "delete", "allot", "transfer", "role.assign"
+  action      String
+  /// snapshot diff
+  before      Json?
+  after       Json?
+  ip          String?
+  userAgent   String?
+  /// optional correlation id for multi-step workflows
+  correlationId String?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}
+
+/// Specialised audit for role/permission/assignment changes — surfaced
+/// prominently in the Super Admin "Role audit" view.
+model RoleAuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorId     String   @db.Uuid
+  /// "role.create" | "role.update" | "role.delete" | "role.assign" | "role.unassign" | "permission.grant" | "permission.revoke" | "impersonate.start" | "impersonate.end"
+  action      String
+  targetUserId String? @db.Uuid
+  targetRoleId String? @db.Uuid
+  payload     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ============================================================
+// Parties (buyers, vendors, etc.)
+// ============================================================
+
+model Person {
+  id          String   @id @default(uuid()) @db.Uuid
+  fullName    String
+  email       String?  @db.Citext
+  phone       String?
+  /// KYC fields (encrypted at rest in v1 via pgcrypto column triggers; plain for MVP)
+  panMasked   String?
+  aadhaarLast4 String?
+  addressLine1 String?
+  addressLine2 String?
+  city        String?
+  state       String?
+  pincode     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User?
+  ownerShares OwnerShare[]
+  companiesAsContact Company[] @relation("CompanyContact")
+
+  @@index([phone])
+}
+
+model Company {
+  id          String   @id @default(uuid()) @db.Uuid
+  legalName   String
+  gstin       String?
+  pan         String?
+  contactPersonId String? @db.Uuid
+  contactPerson   Person? @relation("CompanyContact", fields: [contactPersonId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ownerShares OwnerShare[]
+}
+
+model Vendor {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  gstin       String?
+  pan         String?
+  contactName String?
+  phone       String?
+  email       String?  @db.Citext
+  scope       String?  // free-text scope of work
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workPackages WorkPackage[]
+}
+
+// ============================================================
+// Site & spatial inventory (Modules 1 / 2)
+// ============================================================
+
+enum PlotStatus {
+  UNSOLD
+  RESERVED
+  ALLOTTED
+  UNDER_CONSTRUCTION
+  COMPLETED
+  REGISTERED
+}
+
+enum DevItemStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  ON_HOLD
+}
+
+model Site {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  code         String   @unique
+  city         String?
+  state        String?
+  reraNumber   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  plots            Plot[]
+  developmentItems DevelopmentItem[]
+  cadDrawings      CADDrawing[]
+}
+
+model CADDrawing {
+  id          String   @id @default(uuid()) @db.Uuid
+  siteId      String?  @db.Uuid
+  site        Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  plotId      String?  @db.Uuid
+  plot        Plot?    @relation(fields: [plotId], references: [id], onDelete: Cascade)
+  /// "site" | "plot"
+  scope       String
+  version     Int
+  storageKey  String   // R2/S3 key for raw DWG/DXF
+  svgKey      String?  // rendered SVG for fast preview
+  geojson     Json?    // parsed geometries
+  status      String   // "uploaded" | "parsing" | "review" | "active" | "superseded" | "failed"
+  uploadedBy  String   @db.Uuid
+  supersededById String? @db.Uuid
+  createdAt   DateTime @default(now())
+
+  @@unique([siteId, version])
+  @@index([plotId])
+}
+
+model Plot {
+  id          String   @id @default(uuid()) @db.Uuid
+  siteId      String   @db.Uuid
+  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  plotNumber  String
+  /// PostGIS polygon (simple CRS / in-site coords). Use `Unsupported`
+  /// because Prisma doesn't natively model geometry types — raw SQL
+  /// queries handle reads.
+  geometry    Unsupported("geometry(Polygon, 0)")?
+  areaSqft    Decimal? @db.Decimal(12, 2)
+  status      PlotStatus @default(UNSOLD)
+  registryStatus String  @default("not_started") // not_started | scheduled | completed
+  registryDate   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cadDrawings  CADDrawing[]
+  allotments   Allotment[]
+  transfers    Transfer[]
+
+  @@unique([siteId, plotNumber])
+}
+
+model DevelopmentItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  siteId      String   @db.Uuid
+  site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  /// "road" | "pole" | "club_house" | "water_line" | "boundary" | "plantation" | ...
+  kind        String
+  label       String
+  /// Optional spatial — point or polygon, stored loosely as JSON for now
+  geometry    Json?
+  status      DevItemStatus @default(PLANNED)
+  deadline    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workPackages WorkPackage[]
+
+  @@index([siteId, kind])
+}
+
+model WorkPackage {
+  id           String   @id @default(uuid()) @db.Uuid
+  devItemId    String?  @db.Uuid
+  devItem      DevelopmentItem? @relation(fields: [devItemId], references: [id], onDelete: Cascade)
+  plotId       String?  @db.Uuid
+  vendorId     String?  @db.Uuid
+  vendor       Vendor?  @relation(fields: [vendorId], references: [id])
+  assignedEngineerId String? @db.Uuid
+  name         String
+  percentComplete Decimal @default(0) @db.Decimal(5, 2)
+  status       DevItemStatus @default(PLANNED)
+  budget       Decimal? @db.Decimal(14, 2)
+  deadline     DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  progressUpdates ProgressUpdate[]
+  issues          Issue[]
+
+  @@index([devItemId])
+  @@index([plotId])
+  @@index([assignedEngineerId])
+}
+
+// ============================================================
+// Construction progress (Modules 2 + 3)
+// ============================================================
+
+/// Append-only progress event. Site engineer captures these from the PWA.
+/// Either workPackageId OR plotChecklistItemId is set (mutually exclusive).
+model ProgressUpdate {
+  id            String   @id @default(uuid()) @db.Uuid
+  workPackageId String?  @db.Uuid
+  workPackage   WorkPackage? @relation(fields: [workPackageId], references: [id], onDelete: Cascade)
+  plotChecklistItemId String? @db.Uuid
+  plotChecklistItem   PlotChecklistItem? @relation(fields: [plotChecklistItemId], references: [id], onDelete: Cascade)
+
+  authorId      String   @db.Uuid
+  /// New % value after this update (snapshot; the entity row carries the
+  /// latest as a denormalised cache for fast reads).
+  percentAfter  Decimal  @db.Decimal(5, 2)
+  note          String?
+  /// Geo-tag captured by the engineer's device — WGS-84 lat/lng.
+  lat           Decimal? @db.Decimal(10, 7)
+  lng           Decimal? @db.Decimal(10, 7)
+  capturedAt    DateTime @default(now())
+  /// One or more photo Document ids (kind = "progress_photo").
+  photoDocIds   String[] @default([])
+
+  @@index([workPackageId])
+  @@index([plotChecklistItemId])
+  @@index([authorId])
+}
+
+enum IssueStatus {
+  OPEN
+  RESOLVED
+  WONT_FIX
+}
+
+model Issue {
+  id              String   @id @default(uuid()) @db.Uuid
+  workPackageId   String?  @db.Uuid
+  workPackage     WorkPackage? @relation(fields: [workPackageId], references: [id], onDelete: SetNull)
+  plotChecklistItemId String? @db.Uuid
+  plotChecklistItem   PlotChecklistItem? @relation(fields: [plotChecklistItemId], references: [id], onDelete: SetNull)
+
+  title           String
+  body            String?
+  status          IssueStatus @default(OPEN)
+  severity        String   @default("normal") // "low" | "normal" | "high" | "blocker"
+  raisedById      String   @db.Uuid
+  resolvedById    String?  @db.Uuid
+  resolvedAt      DateTime?
+  resolutionNote  String?
+  photoDocIds     String[] @default([])
+  createdAt       DateTime @default(now())
+
+  @@index([workPackageId])
+  @@index([plotChecklistItemId])
+  @@index([status])
+}
+
+// ============================================================
+// Plot construction checklists (Module 3)
+// ============================================================
+
+model ChecklistTemplate {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       ChecklistTemplateItem[]
+  instances   PlotChecklist[]
+}
+
+/// Template row. `group` lets the UI render tabs (Civil / Plumbing / …).
+model ChecklistTemplateItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  templateId  String   @db.Uuid
+  template    ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  group       String
+  label       String
+  description String?
+  /// Order within the group for stable rendering.
+  position    Int      @default(0)
+
+  @@index([templateId, group, position])
+}
+
+/// Per-plot forked instance. Decouples per-plot edits from the source template.
+model PlotChecklist {
+  id          String   @id @default(uuid()) @db.Uuid
+  plotId      String   @db.Uuid @unique
+  templateId  String?  @db.Uuid
+  template    ChecklistTemplate? @relation(fields: [templateId], references: [id])
+  createdAt   DateTime @default(now())
+
+  items       PlotChecklistItem[]
+}
+
+model PlotChecklistItem {
+  id              String   @id @default(uuid()) @db.Uuid
+  checklistId     String   @db.Uuid
+  checklist       PlotChecklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  group           String
+  label           String
+  description     String?
+  position        Int      @default(0)
+  percentComplete Decimal  @default(0) @db.Decimal(5, 2)
+  status          DevItemStatus @default(PLANNED)
+  assignedEngineerId String? @db.Uuid
+
+  progressUpdates ProgressUpdate[]
+  issues          Issue[]
+
+  @@index([checklistId, group, position])
+  @@index([assignedEngineerId])
+}
+
+// ============================================================
+// Ownership (Module 1)
+// ============================================================
+
+model Allotment {
+  id              String   @id @default(uuid()) @db.Uuid
+  plotId          String   @db.Uuid
+  plot            Plot     @relation(fields: [plotId], references: [id], onDelete: Cascade)
+  /// "active" | "superseded" | "cancelled"
+  status          String   @default("active")
+  salePrice       Decimal  @db.Decimal(14, 2)
+  allotmentLetterDocId String? @db.Uuid
+  allottedAt      DateTime @default(now())
+  supersededAt    DateTime?
+  supersededByTransferId String? @db.Uuid
+  createdBy       String   @db.Uuid
+
+  ownerShares     OwnerShare[]
+  payments        PaymentSchedule[]
+
+  @@index([plotId, status])
+}
+
+model OwnerShare {
+  id          String   @id @default(uuid()) @db.Uuid
+  allotmentId String   @db.Uuid
+  allotment   Allotment @relation(fields: [allotmentId], references: [id], onDelete: Cascade)
+  /// either personId OR companyId is set, not both
+  personId    String?  @db.Uuid
+  person      Person?  @relation(fields: [personId], references: [id])
+  companyId   String?  @db.Uuid
+  company     Company? @relation(fields: [companyId], references: [id])
+  sharePercent Decimal @db.Decimal(5, 2)
+  nomineeName  String?
+  nomineeRelation String?
+
+  @@index([allotmentId])
+  @@index([personId])
+  @@index([companyId])
+}
+
+model Transfer {
+  id              String   @id @default(uuid()) @db.Uuid
+  plotId          String   @db.Uuid
+  plot            Plot     @relation(fields: [plotId], references: [id], onDelete: Cascade)
+  fromAllotmentId String   @db.Uuid
+  toAllotmentId   String   @db.Uuid
+  salePrice       Decimal  @db.Decimal(14, 2)
+  transferLetterDocId String? @db.Uuid
+  status          String   @default("draft") // draft | signed | approved | rejected
+  signedAt        DateTime?
+  approvedAt      DateTime?
+  approvedBy      String?  @db.Uuid
+  initiatedBy     String   @db.Uuid
+  createdAt       DateTime @default(now())
+
+  @@index([plotId])
+}
+
+model PaymentSchedule {
+  id          String   @id @default(uuid()) @db.Uuid
+  allotmentId String   @db.Uuid
+  allotment   Allotment @relation(fields: [allotmentId], references: [id], onDelete: Cascade)
+  label       String   // "Booking", "Plinth", "Slab 1", "Possession", ...
+  dueDate     DateTime
+  amount      Decimal  @db.Decimal(14, 2)
+  status      String   @default("pending") // pending | paid | overdue | waived
+  paidAt      DateTime?
+  receiptDocId String? @db.Uuid
+  razorpayLinkId String?
+
+  @@index([allotmentId, status])
+}
+
+// ============================================================
+// Documents (allotment letters, KYC, receipts, etc.)
+// ============================================================
+
+model Document {
+  id          String   @id @default(uuid()) @db.Uuid
+  kind        String   // "allotment_letter" | "transfer_letter" | "receipt" | "kyc_pan" | "kyc_aadhaar" | "noc"
+  storageKey  String
+  mimeType    String
+  /// Signed-status fields for e-Sign workflows
+  signStatus  String?  // null | "requested" | "partially_signed" | "signed"
+  signProvider String? // "digio"
+  signRefId   String?
+  /// Per-signer status snapshot (mirror of provider state). Shape:
+  ///   [{ "name": "...", "email": "...", "status": "signed|pending", "signedAt": "..." }]
+  signers     Json?
+  uploadedBy  String   @db.Uuid
+  /// Loose link to parent entity. (entityType, entityId) — and the
+  /// optional direct allotmentId — let row-level CASL rules check
+  /// ownership without re-resolving through the entity graph.
+  entityType  String
+  entityId    String
+  allotmentId String?  @db.Uuid
+
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([allotmentId])
+}
+
+// ============================================================
+// KYC (Phase 2)
+// ============================================================
+
+enum KycStatus {
+  DRAFT
+  SUBMITTED
+  VERIFIED
+  REJECTED
+}
+
+model KycSubmission {
+  id          String   @id @default(uuid()) @db.Uuid
+  personId    String   @db.Uuid
+  /// Hashed PAN for de-dup lookups (sha256(pan upper)); raw PAN never stored.
+  panHash     String?
+  panMasked   String?  // "ABCDE****F"
+  aadhaarLast4 String?
+  /// Storage keys for KYC docs (S3); plus signed-URL endpoint to retrieve.
+  panDocKey   String?
+  aadhaarDocKey String?
+  addressDocKey String?
+  status      KycStatus @default(SUBMITTED)
+  submittedAt DateTime  @default(now())
+  verifiedAt  DateTime?
+  verifiedBy  String?   @db.Uuid
+  rejectionReason String?
+
+  @@index([personId])
+  @@index([status])
+  @@index([panHash])
+}
+
+// ============================================================
+// Marketing (Module 4)
+// ============================================================
+
+enum MediaTaskStatus {
+  BRIEFED
+  RAW_UPLOADED
+  EDIT_UPLOADED
+  REVISION_REQUESTED
+  APPROVED
+  PUBLISHED
+}
+
+model MediaTask {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String
+  brief         String?
+  siteId        String?  @db.Uuid
+  plotId        String?  @db.Uuid
+  videographerId String?  @db.Uuid
+  editorId      String?  @db.Uuid
+  status        MediaTaskStatus @default(BRIEFED)
+  deadline      DateTime?
+  createdBy     String   @db.Uuid
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  assets        MediaAsset[]
+  comments      ReviewComment[]
+}
+
+model MediaAsset {
+  id           String   @id @default(uuid()) @db.Uuid
+  taskId       String   @db.Uuid
+  task         MediaTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  kind         String   // "raw" | "edit" | "final"
+  muxAssetId   String?
+  muxPlaybackId String?
+  storageKey   String?
+  uploadedBy   String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  comments     ReviewComment[]
+}
+
+model ReviewComment {
+  id           String   @id @default(uuid()) @db.Uuid
+  taskId       String   @db.Uuid
+  task         MediaTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  assetId      String?  @db.Uuid
+  asset        MediaAsset? @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  authorId     String   @db.Uuid
+  body         String
+  /// in seconds, for timecoded comments on video
+  timestampSec Decimal? @db.Decimal(10, 3)
+  resolved     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([taskId])
+}
+
+// ============================================================
+// Notifications
+// ============================================================
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  /// "email" | "sms" | "whatsapp" | "push" | "in_app"
+  channel   String
+  /// template key, e.g. "plot.allotted", "payment.due", "media.review_requested"
+  templateKey String
+  payload   Json
+  /// "queued" | "sent" | "failed" | "read"
+  status    String   @default("queued")
+  sentAt    DateTime?
+  readAt    DateTime?
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, status])
+}
+
+model NotificationPreference {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  templateKey String
+  channels  String[]   // any of "email" | "sms" | "whatsapp" | "push" | "in_app"
+
+  @@unique([userId, templateKey])
+}
