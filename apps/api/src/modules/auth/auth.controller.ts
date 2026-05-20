@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { z } from 'zod';
-import { loginSchema, refreshSchema } from '@rest/shared-types/schemas';
+import { loginSchema, refreshSchema } from '@rest/shared-types';
 
 import { AuthService } from './auth.service';
 import { Public } from './public.decorator';

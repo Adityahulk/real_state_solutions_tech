@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { BootstrapPlotChecklistInput } from '@rest/shared-types/schemas';
+import type { BootstrapPlotChecklistInput } from '@rest/shared-types';
 
 @Injectable()
 export class PlotConstructionService {

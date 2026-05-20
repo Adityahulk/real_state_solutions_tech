@@ -4,7 +4,7 @@ import { createHash, randomBytes, scryptSync } from 'node:crypto';
 import {
   PERMISSION_CATALOGUE,
   BUILT_IN_ROLES,
-} from '@rest/shared-types/permissions';
+} from '@rest/shared-types';
 
 const prisma = new PrismaClient();
 

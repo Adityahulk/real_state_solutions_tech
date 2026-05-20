@@ -6,7 +6,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { createProgressUpdateSchema } from '@rest/shared-types/schemas';
+import { createProgressUpdateSchema } from '@rest/shared-types';
 import { ProgressService } from './progress.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

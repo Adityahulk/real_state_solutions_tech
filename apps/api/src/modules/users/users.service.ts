@@ -9,7 +9,7 @@ import { hashPassword } from '../auth/auth.service';
 import type {
   CreateUserInput,
   UpdateUserInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 
 @Injectable()
 export class UsersService {

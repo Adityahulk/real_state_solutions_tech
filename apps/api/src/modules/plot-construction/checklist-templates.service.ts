@@ -3,7 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type {
   CreateChecklistTemplateInput,
   UpdateChecklistTemplateInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 
 @Injectable()
 export class ChecklistTemplatesService {

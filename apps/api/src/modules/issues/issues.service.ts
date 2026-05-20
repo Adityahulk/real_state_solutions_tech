@@ -7,7 +7,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import type {
   CreateIssueInput,
   ResolveIssueInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 
 @Injectable()
 export class IssuesService {

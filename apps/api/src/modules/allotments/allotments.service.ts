@@ -8,7 +8,7 @@ import { DocumentsService } from '../documents/documents.service';
 import { LetterRenderer } from '../documents/letter-renderer';
 import { EsignService } from '../esign/esign.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import type { CreateAllotmentInput } from '@rest/shared-types/schemas';
+import type { CreateAllotmentInput } from '@rest/shared-types';
 
 interface ShareCtx {
   name: string;
@@ -70,6 +70,7 @@ export class AllotmentsService {
             nomineeName: s.nomineeName ?? null,
             nomineeRelation: s.nomineeRelation ?? null,
             displayName,
+            name: displayName, // alias for the Handlebars allotment-letter template
             panMasked,
           };
         }),
@@ -105,7 +106,7 @@ export class AllotmentsService {
         site: plot.site,
         plot,
         allotment,
-        shares: resolvedShares as ShareCtx[],
+        shares: resolvedShares,
       });
       const doc = await this.documents.renderAndStore({
         kind: 'allotment_letter',

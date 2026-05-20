@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AbilityFactory } from '../../common/casl/ability.factory';
-import type { CreateProgressUpdateInput } from '@rest/shared-types/schemas';
+import type { CreateProgressUpdateInput } from '@rest/shared-types';
 import type { RequestUser } from '../auth/current-user.decorator';
 
 @Injectable()

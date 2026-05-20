@@ -5,11 +5,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
   CreateRoleInput,
   UpdateRoleInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 
 @Injectable()
 export class RolesService {
@@ -151,7 +152,7 @@ export class RolesService {
         data: perms.map((p) => ({
           roleId,
           permissionId: byKey.get(keyOf(p.subject, p.action))!.id,
-          conditions: (p.conditions ?? null) as object | null,
+          conditions: (p.conditions ?? Prisma.JsonNull) as Prisma.InputJsonValue,
         })),
       });
     }

@@ -10,7 +10,7 @@ import {
 import {
   createWorkPackageSchema,
   updateWorkPackageSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { WorkPackagesService } from './work-packages.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

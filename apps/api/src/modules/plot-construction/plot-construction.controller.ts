@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { z } from 'zod';
-import { bootstrapPlotChecklistSchema } from '@rest/shared-types/schemas';
+import { bootstrapPlotChecklistSchema } from '@rest/shared-types';
 import { PlotConstructionService } from './plot-construction.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

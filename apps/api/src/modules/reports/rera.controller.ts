@@ -1,6 +1,6 @@
 import { Controller, Get, Header, Query, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
-import { reraQuerySchema } from '@rest/shared-types/schemas';
+import { reraQuerySchema } from '@rest/shared-types';
 import { ReraService } from './rera.service';
 import { MahaReraAdapter } from './maharera.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';

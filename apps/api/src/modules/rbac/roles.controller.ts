@@ -9,7 +9,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { createRoleSchema, updateRoleSchema } from '@rest/shared-types/schemas';
+import { createRoleSchema, updateRoleSchema } from '@rest/shared-types';
 import { RolesService } from './roles.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

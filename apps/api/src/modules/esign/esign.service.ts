@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { DigioClient, type DigioSigner } from './digio.client';
-import type { RequestEsignInput } from '@rest/shared-types/schemas';
+import type { RequestEsignInput } from '@rest/shared-types';
 
 @Injectable()
 export class EsignService {

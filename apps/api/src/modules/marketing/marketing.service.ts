@@ -16,7 +16,7 @@ import type {
   FinishMediaUploadInput,
   MediaTaskDecisionInput,
   ReviewCommentInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import type { RequestUser } from '../auth/current-user.decorator';
 
 @Injectable()

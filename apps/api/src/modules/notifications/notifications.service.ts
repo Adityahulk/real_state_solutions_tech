@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { QUEUE_NAMES } from '../queue/queue.module';
 
@@ -40,7 +41,7 @@ export class NotificationsService {
           userId,
           channel,
           templateKey: opts.templateKey,
-          payload: opts.payload,
+          payload: opts.payload as Prisma.InputJsonValue,
           status: 'queued',
         })),
       ),

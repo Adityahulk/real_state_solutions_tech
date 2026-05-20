@@ -11,7 +11,7 @@ import {
   createScheduleSchema,
   markPaidSchema,
   payInstallmentSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { PaymentsService } from './payments.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

@@ -17,7 +17,7 @@ import {
   finishMediaUploadSchema,
   mediaTaskDecisionSchema,
   reviewCommentSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { MarketingService } from './marketing.service';
 import { MuxService } from './mux.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';

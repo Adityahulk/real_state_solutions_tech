@@ -4,9 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
+import { KycStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
-import type { SubmitKycInput, VerifyKycInput } from '@rest/shared-types/schemas';
+import type { SubmitKycInput, VerifyKycInput } from '@rest/shared-types';
 
 function maskPan(pan: string): string {
   if (!pan || pan.length !== 10) return '****';
@@ -92,8 +93,12 @@ export class KycService {
   }
 
   list(opts: { status?: string } = {}) {
+    const where: Prisma.KycSubmissionWhereInput = {};
+    if (opts.status && (Object.values(KycStatus) as string[]).includes(opts.status)) {
+      where.status = opts.status as KycStatus;
+    }
     return this.prisma.kycSubmission.findMany({
-      where: { status: opts.status as 'SUBMITTED' | 'VERIFIED' | 'REJECTED' | 'DRAFT' | undefined },
+      where,
       orderBy: { submittedAt: 'desc' },
       include: { person: { select: { id: true, fullName: true, email: true } } },
     });

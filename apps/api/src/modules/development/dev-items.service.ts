@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
   CreateDevItemInput,
   UpdateDevItemInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 
 @Injectable()
 export class DevItemsService {
@@ -30,7 +31,7 @@ export class DevItemsService {
    */
   async siteFeatureCollection(siteId: string) {
     const rows = await this.prisma.developmentItem.findMany({
-      where: { siteId, geometry: { not: null } },
+      where: { siteId, NOT: { geometry: { equals: Prisma.DbNull } } },
       select: {
         id: true,
         kind: true,
@@ -75,7 +76,7 @@ export class DevItemsService {
         siteId: input.siteId,
         kind: input.kind,
         label: input.label,
-        geometry: (input.geometry ?? null) as object | null,
+        geometry: (input.geometry ?? Prisma.JsonNull) as Prisma.InputJsonValue,
         deadline: input.deadline ? new Date(input.deadline) : null,
       },
     });

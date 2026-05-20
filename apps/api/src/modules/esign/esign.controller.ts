@@ -7,7 +7,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { requestEsignSchema } from '@rest/shared-types/schemas';
+import { requestEsignSchema } from '@rest/shared-types';
 import { EsignService } from './esign.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

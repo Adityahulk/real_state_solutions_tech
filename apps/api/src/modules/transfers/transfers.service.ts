@@ -11,7 +11,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import type {
   ApproveTransferInput,
   InitiateTransferInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 
 @Injectable()
 export class TransfersService {

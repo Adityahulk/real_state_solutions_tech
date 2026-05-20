@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loginSchema } from '@rest/shared-types/schemas';
+import { loginSchema } from '@rest/shared-types';
 
 const UPSTREAM = process.env.API_URL ?? 'http://localhost:4000';
 const ACCESS_COOKIE = 'rest_access';

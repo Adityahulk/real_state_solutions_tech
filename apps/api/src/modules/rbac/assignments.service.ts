@@ -4,8 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { AssignRoleInput } from '@rest/shared-types/schemas';
+import type { AssignRoleInput } from '@rest/shared-types';
 
 @Injectable()
 export class AssignmentsService {
@@ -17,7 +18,8 @@ export class AssignmentsService {
     const role = await this.prisma.role.findUnique({ where: { id: input.roleId } });
     if (!role) throw new NotFoundException('Role not found');
 
-    const scope = (input.scope ?? null) as object | null;
+    const scope: Prisma.InputJsonValue | typeof Prisma.JsonNull = (input.scope ??
+      Prisma.JsonNull) as Prisma.InputJsonValue;
     try {
       const assignment = await this.prisma.userRoleAssignment.create({
         data: {

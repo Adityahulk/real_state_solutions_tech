@@ -10,7 +10,7 @@ import {
 import {
   createChecklistTemplateSchema,
   updateChecklistTemplateSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { ChecklistTemplatesService } from './checklist-templates.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

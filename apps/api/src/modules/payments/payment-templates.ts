@@ -1,4 +1,4 @@
-import type { PaymentTemplate } from '@rest/shared-types/schemas';
+import type { PaymentTemplate } from '@rest/shared-types';
 
 export interface TemplateMilestone {
   /** display label */

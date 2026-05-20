@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { createVendorSchema } from '@rest/shared-types/schemas';
+import { createVendorSchema } from '@rest/shared-types';
 import { VendorsService } from './vendors.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

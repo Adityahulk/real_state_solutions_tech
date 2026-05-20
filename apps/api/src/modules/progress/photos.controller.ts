@@ -2,7 +2,7 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import {
   photoPresignSchema,
   registerPhotoSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';

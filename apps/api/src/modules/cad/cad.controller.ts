@@ -3,7 +3,7 @@ import {
   cadActivateSchema,
   completeCadUploadSchema,
   presignUploadSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { CadService } from './cad.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

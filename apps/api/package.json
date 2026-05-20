@@ -23,6 +23,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.4.4",
     "@nestjs/throttler": "^6.2.1",
+    "@prisma/client": "^5.20.0",
     "@rest/db": "workspace:*",
     "@rest/shared-types": "workspace:*",
     "bcryptjs": "^2.4.3",

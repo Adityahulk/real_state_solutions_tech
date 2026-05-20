@@ -8,7 +8,7 @@ import { AbilityFactory } from '../../common/casl/ability.factory';
 import type {
   CreateWorkPackageInput,
   UpdateWorkPackageInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import type { RequestUser } from '../auth/current-user.decorator';
 
 @Injectable()

@@ -10,7 +10,7 @@ import {
 import {
   createDevItemSchema,
   updateDevItemSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { DevItemsService } from './dev-items.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

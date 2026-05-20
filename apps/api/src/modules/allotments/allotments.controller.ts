@@ -6,7 +6,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { createAllotmentSchema } from '@rest/shared-types/schemas';
+import { createAllotmentSchema } from '@rest/shared-types';
 import { AllotmentsService } from './allotments.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

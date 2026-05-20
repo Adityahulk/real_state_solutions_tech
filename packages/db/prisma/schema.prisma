@@ -306,6 +306,7 @@ model Plot {
   cadDrawings  CADDrawing[]
   allotments   Allotment[]
   transfers    Transfer[]
+  checklist    PlotChecklist?
 
   @@unique([siteId, plotNumber])
 }
@@ -446,6 +447,7 @@ model ChecklistTemplateItem {
 model PlotChecklist {
   id          String   @id @default(uuid()) @db.Uuid
   plotId      String   @db.Uuid @unique
+  plot        Plot     @relation(fields: [plotId], references: [id], onDelete: Cascade)
   templateId  String?  @db.Uuid
   template    ChecklistTemplate? @relation(fields: [templateId], references: [id])
   createdAt   DateTime @default(now())

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import type { CreateVendorInput } from '@rest/shared-types/schemas';
+import type { CreateVendorInput } from '@rest/shared-types';
 
 @Injectable()
 export class VendorsService {

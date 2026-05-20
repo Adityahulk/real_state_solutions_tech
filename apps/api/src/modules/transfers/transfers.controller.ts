@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
   approveTransferSchema,
   initiateTransferSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { TransfersService } from './transfers.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

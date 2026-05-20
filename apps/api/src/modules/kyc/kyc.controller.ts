@@ -12,7 +12,7 @@ import {
   presignUploadSchema,
   submitKycSchema,
   verifyKycSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { KycService } from './kyc.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';

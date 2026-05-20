@@ -8,7 +8,7 @@ import type {
   CadActivateInput,
   CompleteCadUploadInput,
   PresignUploadInput,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import type { ParsedEntity } from './cad.parser';
 
 @Injectable()

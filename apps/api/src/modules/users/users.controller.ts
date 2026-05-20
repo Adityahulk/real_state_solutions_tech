@@ -10,7 +10,7 @@ import {
   UseGuards,
   HttpCode,
 } from '@nestjs/common';
-import { createUserSchema, updateUserSchema } from '@rest/shared-types/schemas';
+import { createUserSchema, updateUserSchema } from '@rest/shared-types';
 import { UsersService } from './users.service';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';

@@ -10,7 +10,7 @@ import {
 import {
   createIssueSchema,
   resolveIssueSchema,
-} from '@rest/shared-types/schemas';
+} from '@rest/shared-types';
 import { IssuesService } from './issues.service';
 import { AbilitiesGuard } from '../../common/casl/abilities.guard';
 import { CheckAbilities } from '../../common/casl/check-abilities.decorator';
