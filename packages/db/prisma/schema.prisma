@@ -199,6 +199,7 @@ model Person {
   user        User?
   ownerShares OwnerShare[]
   companiesAsContact Company[] @relation("CompanyContact")
+  kycSubmissions     KycSubmission[]
 
   @@index([phone])
 }
@@ -592,6 +593,7 @@ enum KycStatus {
 model KycSubmission {
   id          String   @id @default(uuid()) @db.Uuid
   personId    String   @db.Uuid
+  person      Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   /// Hashed PAN for de-dup lookups (sha256(pan upper)); raw PAN never stored.
   panHash     String?
   panMasked   String?  // "ABCDE****F"
