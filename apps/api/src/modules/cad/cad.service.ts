@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { QUEUE_NAMES } from '../queue/queue.module';
@@ -132,7 +133,7 @@ export class CadService {
             siteId: drawing.siteId!,
             kind: it.devKind ?? it.layer.toLowerCase(),
             label: it.label,
-            geometry: it.geometry as object,
+            geometry: it.geometry as Prisma.InputJsonValue,
           },
         });
       }
@@ -149,7 +150,7 @@ export class CadService {
   async markParseFailed(drawingId: string, reason: string) {
     await this.prisma.cADDrawing.update({
       where: { id: drawingId },
-      data: { status: 'failed', geojson: { error: reason } as object },
+      data: { status: 'failed', geojson: { error: reason } as Prisma.InputJsonValue },
     });
   }
 
@@ -158,7 +159,7 @@ export class CadService {
       where: { id: drawingId },
       data: {
         status: 'review',
-        geojson: { entities } as object,
+        geojson: { entities } as Prisma.InputJsonValue,
         svgKey: svgKey ?? null,
       },
     });

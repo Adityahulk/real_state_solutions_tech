@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { DigioClient, type DigioSigner } from './digio.client';
@@ -49,7 +50,7 @@ export class EsignService {
         signStatus: 'requested',
         signProvider: 'digio',
         signRefId: resp.id,
-        signers: signerRows as object,
+        signers: signerRows as unknown as Prisma.InputJsonValue,
       },
     });
 
@@ -62,7 +63,10 @@ export class EsignService {
   async markFailed(documentId: string, reason: string) {
     await this.prisma.document.update({
       where: { id: documentId },
-      data: { signStatus: 'failed', signers: [{ reason }] as object },
+      data: {
+        signStatus: 'failed',
+        signers: [{ reason }] as unknown as Prisma.InputJsonValue,
+      },
     });
   }
 
@@ -84,7 +88,7 @@ export class EsignService {
     await this.prisma.document.update({
       where: { id: documentId },
       data: {
-        signers: updated as object,
+        signers: updated as unknown as Prisma.InputJsonValue,
         signStatus: allSigned ? 'signed' : 'partially_signed',
       },
     });

@@ -90,7 +90,7 @@ export class RolesService {
           actorId,
           action: 'role.update',
           targetRoleId: id,
-          payload: input as object,
+          payload: input as unknown as Prisma.InputJsonValue,
         },
       });
       return updated;

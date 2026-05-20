@@ -1,2 +1,2 @@
-export * from './permissions.js';
-export * from './schemas.js';
+export * from './permissions';
+export * from './schemas';

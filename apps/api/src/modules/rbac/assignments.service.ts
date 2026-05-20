@@ -35,7 +35,9 @@ export class AssignmentsService {
           action: 'role.assign',
           targetUserId: input.userId,
           targetRoleId: input.roleId,
-          payload: input.scope ? (input.scope as object) : undefined,
+          payload: input.scope
+            ? (input.scope as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
         },
       });
       return assignment;
