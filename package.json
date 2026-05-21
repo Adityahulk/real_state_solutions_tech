@@ -10,6 +10,9 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
+    "dev:infra": "docker compose -f infra/docker-compose.dev.yml up -d postgres redis minio minio-init",
+    "web:dev": "pnpm --filter @rest/web dev",
+    "api:dev": "pnpm --filter @rest/api dev",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
