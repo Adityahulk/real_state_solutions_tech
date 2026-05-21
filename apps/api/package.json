@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "nest build",
-    "dev": "nest start --watch",
+    "build": "pnpm --filter @rest/shared-types build && nest build",
+    "dev": "pnpm --filter @rest/shared-types build && nest start --watch --tsc",
     "start": "node dist/main.js",
     "test": "vitest run",
     "test:watch": "vitest",

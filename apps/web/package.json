@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000",
-    "build": "next build",
-    "start": "next start -p 3000",
+    "dev": "pnpm --filter @rest/shared-types build && next dev ${WEB_PORT:+-p $WEB_PORT}",
+    "build": "pnpm --filter @rest/shared-types build && next build",
+    "start": "next start -p ${WEB_PORT:-3000}",
     "lint": "next lint --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test"
