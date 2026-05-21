@@ -68,7 +68,7 @@ export function DashboardPreview() {
             </div>
             <div className="flex items-center gap-1.5 text-xs text-emerald-300/90 bg-emerald-400/10 border border-emerald-400/15 px-2 py-1 rounded-full">
               <span className="relative w-1.5 h-1.5">
-                <span className="absolute inset-0 rounded-full bg-emerald-400 ping-soft text-emerald-400" />
+                <span className="absolute inset-0 rounded-full bg-emerald-400 animate-rest-ping" />
                 <span className="relative block w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </span>
               Live
@@ -162,7 +162,7 @@ function KPI({ label, value, delta }: { label: string; value: string; delta: str
       <div className="text-[10px] uppercase tracking-wider text-white/40">{label}</div>
       <div className="mt-1 flex items-baseline justify-between">
         <span className="text-sm font-semibold tabular-nums">{value}</span>
-        <span className="text-[10px] delta-up px-1.5 py-0.5 rounded-md">
+        <span className="text-[10px] text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded-md">
           {delta}
         </span>
       </div>

@@ -4,8 +4,17 @@ import { DashboardPreview } from './DashboardPreview';
 
 export function Hero({ isAuthed }: { isAuthed: boolean }) {
   return (
-    <section className="hero-bg relative overflow-hidden text-white">
-      <div className="hero-grid absolute inset-0 pointer-events-none" />
+    <section className="relative overflow-hidden text-white bg-[#050b1c] bg-hero-radial">
+      {/* Faint grid overlay */}
+      <div
+        className="absolute inset-0 bg-hero-grid bg-[length:56px_56px] pointer-events-none"
+        style={{
+          maskImage:
+            'radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 80%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 80%)',
+        }}
+      />
 
       <div className="relative mx-auto max-w-7xl px-5 lg:px-8 pt-32 pb-20 lg:pt-40 lg:pb-28">
         {/* Eyebrow */}
@@ -20,12 +29,14 @@ export function Hero({ isAuthed }: { isAuthed: boolean }) {
 
         {/* Headline */}
         <h1 className="mt-7 mx-auto max-w-5xl text-center text-[40px] leading-[1.05] sm:text-6xl lg:text-7xl font-semibold tracking-tight">
-          <span className="gradient-text">The operating system</span>
+          <span className="bg-gradient-to-br from-white via-indigo-200 to-sky-400 bg-clip-text text-transparent">
+            The operating system
+          </span>
           <br />
-          for India&rsquo;s real estate developers.
+          <span className="text-white">for India&rsquo;s real estate developers.</span>
         </h1>
 
-        <p className="mt-7 mx-auto max-w-2xl text-center text-lg text-white/65 leading-relaxed">
+        <p className="mt-7 mx-auto max-w-2xl text-center text-lg text-white/70 leading-relaxed">
           From CAD-to-CRM site mapping and construction tracking to AI expense
           intelligence and RERA filings — one unified platform replacing the
           spreadsheets, ERPs and WhatsApp groups your teams run on today.
@@ -57,7 +68,7 @@ export function Hero({ isAuthed }: { isAuthed: boolean }) {
         </div>
 
         {/* Trust micro-row */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white/50">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-white/60">
           <span className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
             RERA-compliant by design
@@ -69,8 +80,7 @@ export function Hero({ isAuthed }: { isAuthed: boolean }) {
         </div>
 
         {/* Dashboard preview */}
-        <div className="mt-16 lg:mt-20 relative float-y">
-          {/* Glow behind the preview */}
+        <div className="mt-16 lg:mt-20 relative animate-rest-float">
           <div
             className="absolute -inset-x-10 -inset-y-6 bg-gradient-to-tr from-brand-500/30 via-sky-400/20 to-indigo-500/30 blur-3xl opacity-60 pointer-events-none"
             aria-hidden="true"

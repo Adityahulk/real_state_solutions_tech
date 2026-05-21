@@ -29,7 +29,7 @@ const STATS = [
 
 export function Stats() {
   return (
-    <section className="relative bg-white border-y border-slate-200 py-20 dotted-bg">
+    <section className="relative bg-white border-y border-slate-200 py-20 bg-dotted-slate bg-[length:18px_18px]">
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-xs uppercase tracking-[0.22em] text-brand-700 font-semibold">
@@ -49,7 +49,7 @@ export function Stats() {
               <div className="w-10 h-10 mx-auto rounded-xl bg-brand-50 border border-brand-500/15 flex items-center justify-center">
                 <Icon className="w-4 h-4 text-brand-700" />
               </div>
-              <div className="mt-4 text-3xl lg:text-4xl font-semibold tracking-tight gradient-text-dark">
+              <div className="mt-4 text-3xl lg:text-4xl font-semibold tracking-tight bg-gradient-to-br from-slate-900 via-blue-700 to-sky-500 bg-clip-text text-transparent">
                 {value}
               </div>
               <div className="mt-1 text-sm font-medium text-slate-900">{label}</div>

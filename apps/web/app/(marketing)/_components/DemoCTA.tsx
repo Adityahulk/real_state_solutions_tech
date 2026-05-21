@@ -22,7 +22,15 @@ export function DemoCTA() {
       className="relative bg-[#050b1c] text-white py-24 lg:py-32 overflow-hidden"
     >
       {/* Background flair */}
-      <div className="absolute inset-0 hero-grid pointer-events-none" />
+      <div
+        className="absolute inset-0 bg-hero-grid bg-[length:56px_56px] pointer-events-none"
+        style={{
+          maskImage:
+            'radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 80%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 80%)',
+        }}
+      />
       <div className="absolute -bottom-32 -left-20 w-[600px] h-[600px] bg-brand-500/20 blur-[140px] rounded-full pointer-events-none" />
       <div className="absolute -top-32 -right-20 w-[500px] h-[500px] bg-indigo-500/20 blur-[140px] rounded-full pointer-events-none" />
 
@@ -30,7 +38,9 @@ export function DemoCTA() {
         {/* Copy */}
         <div>
           <h2 className="text-4xl lg:text-5xl font-semibold tracking-tight">
-            <span className="gradient-text">See Rest on your own data.</span>
+            <span className="bg-gradient-to-br from-white via-indigo-200 to-sky-400 bg-clip-text text-transparent">
+              See Rest on your own data.
+            </span>
           </h2>
           <p className="mt-5 text-lg text-white/65 leading-relaxed">
             Send us a recent CAD and we&rsquo;ll set up a working sandbox of your

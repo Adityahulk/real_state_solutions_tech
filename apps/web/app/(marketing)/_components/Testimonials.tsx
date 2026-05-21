@@ -54,7 +54,7 @@ export function Testimonials() {
           <div className="text-xs uppercase tracking-[0.22em] text-brand-700 font-semibold">
             What customers say
           </div>
-          <h2 className="mt-3 text-4xl lg:text-5xl font-semibold tracking-tight gradient-text-dark">
+          <h2 className="mt-3 text-4xl lg:text-5xl font-semibold tracking-tight bg-gradient-to-br from-slate-900 via-blue-700 to-sky-500 bg-clip-text text-transparent">
             Three of North India&rsquo;s largest builders, one platform.
           </h2>
           <p className="mt-5 text-lg text-slate-600 leading-relaxed">

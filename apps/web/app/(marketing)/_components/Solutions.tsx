@@ -142,7 +142,7 @@ function Header() {
       <div className="text-xs uppercase tracking-[0.22em] text-brand-700 font-semibold">
         Solutions
       </div>
-      <h2 className="mt-3 text-4xl lg:text-5xl font-semibold tracking-tight gradient-text-dark">
+      <h2 className="mt-3 text-4xl lg:text-5xl font-semibold tracking-tight bg-gradient-to-br from-slate-900 via-blue-700 to-sky-500 bg-clip-text text-transparent">
         One platform for every team on your project.
       </h2>
       <p className="mt-5 text-lg text-slate-600 leading-relaxed">
@@ -156,7 +156,7 @@ function Header() {
 
 function SolutionCard({ icon: Icon, title, body, status, points }: Solution) {
   return (
-    <article className="card-glow group rounded-2xl border border-slate-200 bg-white p-6 flex flex-col">
+    <article className="group rounded-2xl border border-slate-200 bg-white p-6 flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-xl hover:shadow-brand-500/10">
       <div className="flex items-start justify-between">
         <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-50 to-sky-50 border border-brand-500/15 flex items-center justify-center">
           <Icon className="w-5 h-5 text-brand-700" />

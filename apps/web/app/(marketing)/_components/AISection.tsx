@@ -16,8 +16,10 @@ export function AISection() {
               AI inside Rest
             </div>
             <h2 className="mt-4 text-4xl lg:text-5xl font-semibold tracking-tight">
-              <span className="gradient-text">An AI that knows what your project costs</span>
-              {' '}— before you do.
+              <span className="bg-gradient-to-br from-white via-indigo-200 to-sky-400 bg-clip-text text-transparent">
+                An AI that knows what your project costs
+              </span>{' '}
+              <span className="text-white">— before you do.</span>
             </h2>
             <p className="mt-6 text-lg text-white/65 leading-relaxed">
               We trained on three years of real builder data — POs, invoices,

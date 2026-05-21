@@ -52,7 +52,7 @@ export function ClientStrip() {
             'linear-gradient(to right, transparent, #000 8%, #000 92%, transparent)',
         }}
       >
-        <div className="marquee-track flex gap-14 whitespace-nowrap w-max items-center">
+        <div className="animate-rest-marquee flex gap-14 whitespace-nowrap w-max items-center">
           {items.map(({ name, icon: Icon }, i) => (
             <div
               key={`${name}-${i}`}

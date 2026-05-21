@@ -25,8 +25,6 @@ body {
   border-radius: 4px;
 }
 
-/* But suppress on `<input>` / `<select>` / `<textarea>` — they already get
-   their own border colour treatment via the focus:border-brand-500 class. */
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
@@ -34,121 +32,7 @@ textarea:focus-visible {
   box-shadow: 0 0 0 2px theme('colors.brand.500');
 }
 
-/* ============================================================
-   MARKETING SITE STYLES
-   Scoped to .marketing-root so they don't leak into admin/owner/
-   engineer surfaces. Lives in globals.css so it loads reliably on
-   the landing page (route-group CSS imports were not bundling).
-   ============================================================ */
-
-.marketing-root {
-  background: #fff;
-  color: #0f172a;
-  font-feature-settings: 'ss01', 'cv01', 'cv11';
-  min-height: 100vh;
-}
-
-/* Anchor jumps should clear the fixed nav. */
-.marketing-root section[id] {
-  scroll-margin-top: 80px;
-}
-html:has(.marketing-root) {
+/* Smooth scroll on anchor links from the marketing nav. */
+html {
   scroll-behavior: smooth;
-}
-
-/* Hero background — radial blue glow on near-black */
-.marketing-root .hero-bg {
-  background:
-    radial-gradient(60% 40% at 50% 0%, rgba(37, 99, 235, 0.45) 0%, rgba(37, 99, 235, 0) 70%),
-    radial-gradient(45% 35% at 85% 15%, rgba(56, 189, 248, 0.25) 0%, rgba(56, 189, 248, 0) 75%),
-    radial-gradient(45% 40% at 15% 60%, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0) 75%),
-    #050b1c;
-}
-
-.marketing-root .hero-grid {
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
-  background-size: 56px 56px;
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 80%);
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 80%);
-}
-
-.marketing-root .fade-edge-top {
-  background: linear-gradient(to bottom, rgba(5, 11, 28, 0) 0%, #fff 100%);
-}
-
-.marketing-root .dotted-bg {
-  background-image: radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px);
-  background-size: 18px 18px;
-}
-
-/* Brand gradient text — bright variant on dark sections */
-.marketing-root .gradient-text {
-  background: linear-gradient(120deg, #ffffff 0%, #c7d2fe 50%, #60a5fa 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-
-/* Brand gradient text — dark variant on light sections */
-.marketing-root .gradient-text-dark {
-  background: linear-gradient(120deg, #0f172a 0%, #1d4ed8 50%, #0ea5e9 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-
-/* Glow border on hover for solution cards */
-.marketing-root .card-glow {
-  position: relative;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-}
-.marketing-root .card-glow:hover {
-  transform: translateY(-3px);
-  border-color: rgba(37, 99, 235, 0.45);
-  box-shadow:
-    0 18px 40px -16px rgba(37, 99, 235, 0.25),
-    0 4px 10px -4px rgba(15, 23, 42, 0.06);
-}
-
-@keyframes rest-ping-soft {
-  0% { transform: scale(0.9); opacity: 0.8; }
-  70% { transform: scale(1.7); opacity: 0; }
-  100% { opacity: 0; }
-}
-.marketing-root .ping-soft::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: currentColor;
-  animation: rest-ping-soft 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-
-@keyframes rest-marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.marketing-root .marquee-track {
-  animation: rest-marquee 36s linear infinite;
-}
-
-@keyframes rest-float-y {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-.marketing-root .float-y {
-  animation: rest-float-y 6s ease-in-out infinite;
-}
-
-.marketing-root .delta-up {
-  color: #10b981;
-  background: rgba(16, 185, 129, 0.1);
-}
-.marketing-root .delta-down {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
 }

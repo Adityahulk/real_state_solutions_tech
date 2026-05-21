@@ -39,7 +39,7 @@ export function Process() {
           <div className="text-xs uppercase tracking-[0.22em] text-brand-700 font-semibold">
             How it works
           </div>
-          <h2 className="mt-3 text-4xl lg:text-5xl font-semibold tracking-tight gradient-text-dark">
+          <h2 className="mt-3 text-4xl lg:text-5xl font-semibold tracking-tight bg-gradient-to-br from-slate-900 via-blue-700 to-sky-500 bg-clip-text text-transparent">
             From CAD to closing in four moves.
           </h2>
           <p className="mt-5 text-lg text-slate-600 leading-relaxed">

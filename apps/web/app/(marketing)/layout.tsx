@@ -7,5 +7,7 @@ export const metadata: Metadata = {
 };
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
-  return <div className="marketing-root">{children}</div>;
+  // bg-white so the body's bg-slate-50 doesn't peek through anywhere; min-h
+  // so short sections still cover the viewport.
+  return <div className="bg-white text-slate-900 min-h-screen">{children}</div>;
 }
