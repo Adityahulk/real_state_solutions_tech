@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import './marketing.css';
 
 export const metadata: Metadata = {
   title: 'Rest — The operating system for India\'s real estate developers',
