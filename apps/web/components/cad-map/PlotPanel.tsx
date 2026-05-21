@@ -96,7 +96,7 @@ export function PlotPanel({ plotId, audience }: Props) {
           <p className="text-sm text-slate-500">No active allotment.</p>
           {audience === 'admin' && (
             <Link
-              href={`${basePath}/${p.id}/allot`}
+              href={`/admin/plots/${p.id}/allot`}
               className="mt-2 inline-flex items-center gap-1.5 text-sm rounded-md bg-brand-500 text-white px-3 py-1.5 hover:bg-brand-700"
             >
               <PenSquare className="w-3.5 h-3.5" />

@@ -10,9 +10,8 @@ const nextConfig = {
   // Without this, a single `import { X } from 'lucide-react'` pulls in the
   // whole barrel (~1 MB) — visible as a several-second hit on slow CPUs.
   experimental: {
-    typedRoutes: true,
     scrollRestoration: true,
-    optimizePackageImports: ['lucide-react', '@tanstack/react-query', 'date-fns'],
+    optimizePackageImports: ['lucide-react', '@tanstack/react-query'],
   },
   transpilePackages: ['@rest/shared-types'],
   // Emit a minimal `.next/standalone/` server bundle so the production image

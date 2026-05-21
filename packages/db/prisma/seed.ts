@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { createHash, randomBytes, scryptSync } from 'node:crypto';
 import {
   PERMISSION_CATALOGUE,
@@ -12,6 +12,10 @@ function hashPassword(password: string): string {
   const salt = randomBytes(16).toString('hex');
   const hash = scryptSync(password, salt, 64).toString('hex');
   return `scrypt$${salt}$${hash}`;
+}
+
+function jsonOrNull(value: Record<string, unknown> | null | undefined): Prisma.InputJsonValue | typeof Prisma.JsonNull {
+  return value == null ? Prisma.JsonNull : JSON.parse(JSON.stringify(value));
 }
 
 async function enableExtensions() {
@@ -76,7 +80,7 @@ async function seedRoles() {
         data: {
           roleId: role.id,
           permissionId: dbPerm.id,
-          conditions: perm.conditions ?? null,
+          conditions: jsonOrNull(perm.conditions),
         },
       });
     }
