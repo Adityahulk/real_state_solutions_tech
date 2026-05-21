@@ -3,6 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { api } from '~/lib/api';
+import { useToast } from '~/components/ui/Toast';
+import { useConfirm } from '~/components/ui/Confirm';
 
 interface RoleRow {
   id: string;
@@ -16,6 +18,8 @@ interface RoleRow {
 
 export default function RolesPage() {
   const qc = useQueryClient();
+  const toast = useToast();
+  const { ask: askConfirm, node: confirmNode } = useConfirm();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -31,6 +35,7 @@ export default function RolesPage() {
 
   return (
     <div className="grid grid-cols-[320px_1fr] gap-6">
+      {confirmNode}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">Roles</h1>
@@ -77,11 +82,17 @@ export default function RolesPage() {
         {selectedId ? (
           <RoleEditor
             roleId={selectedId}
-            onDelete={(id) => {
-              if (!confirm('Delete this role?')) return;
+            onDelete={async (id) => {
+              const ok = await askConfirm({
+                title: 'Delete role?',
+                body: 'This action cannot be undone.',
+                destructive: true,
+                confirmLabel: 'Delete',
+              });
+              if (!ok) return;
               deleteMut.mutate(id, {
                 onSuccess: () => setSelectedId(null),
-                onError: (e) => alert((e as Error).message),
+                onError: (e) => toast.show((e as Error).message, 'error'),
               });
             }}
           />
@@ -125,6 +136,7 @@ function RoleEditor({
   onDelete: (id: string) => void;
 }) {
   const qc = useQueryClient();
+  const toast = useToast();
   const roleQ = useQuery({
     queryKey: ['role', roleId],
     queryFn: () => api.get<RoleDetail>(`/roles/${roleId}`),
@@ -168,7 +180,7 @@ function RoleEditor({
       qc.invalidateQueries({ queryKey: ['role', roleId] });
       qc.invalidateQueries({ queryKey: ['roles'] });
     },
-    onError: (e) => alert((e as Error).message),
+    onError: (e) => toast.show((e as Error).message, 'error'),
   });
 
   if (!roleQ.data || !catalogueQ.data) return <div className="text-slate-500 text-sm">Loading…</div>;

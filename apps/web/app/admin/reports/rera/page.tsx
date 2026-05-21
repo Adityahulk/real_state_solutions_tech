@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '~/lib/api';
+import { useToast } from '~/components/ui/Toast';
 
 interface SiteRow {
   id: string;
@@ -43,6 +44,7 @@ interface Report {
 
 export default function ReraPage() {
   const now = useMemo(() => new Date(), []);
+  const toast = useToast();
   const [year, setYear] = useState(now.getFullYear());
   const [quarter, setQuarter] = useState(Math.ceil((now.getMonth() + 1) / 3));
   const [siteId, setSiteId] = useState<string>('');
@@ -83,7 +85,7 @@ export default function ReraPage() {
       { credentials: 'include' },
     );
     if (!res.ok) {
-      alert(`MahaRERA CSV download failed (${res.status})`);
+      toast.show(`MahaRERA CSV download failed (${res.status})`, 'error');
       return;
     }
     const blob = await res.blob();
