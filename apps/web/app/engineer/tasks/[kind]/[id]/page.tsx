@@ -4,7 +4,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '~/lib/api';
-import { offlineQueue, pingQueueChanged } from '~/lib/offline-queue';
+import { offlineQueue } from '~/lib/offline-queue';
+import { pingQueueChanged } from '~/components/pwa/PwaBootstrap';
 
 type Kind = 'work_package' | 'plot_checklist_item';
 
@@ -48,7 +49,7 @@ export default function EngineerTaskUpdate() {
 
   useEffect(() => {
     if (typeof navigator === 'undefined') return;
-    setOnline(online);
+    setOnline(navigator.onLine);
     const on = () => setOnline(true);
     const off = () => setOnline(false);
     window.addEventListener('online', on);
