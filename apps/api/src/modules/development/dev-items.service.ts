@@ -76,7 +76,7 @@ export class DevItemsService {
         siteId: input.siteId,
         kind: input.kind,
         label: input.label,
-        geometry: (input.geometry ?? Prisma.JsonNull) as Prisma.InputJsonValue,
+        geometry: (input.geometry ?? Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
         deadline: input.deadline ? new Date(input.deadline) : null,
       },
     });

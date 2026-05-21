@@ -133,7 +133,7 @@ export class CadService {
             siteId: drawing.siteId!,
             kind: it.devKind ?? it.layer.toLowerCase(),
             label: it.label,
-            geometry: it.geometry as Prisma.InputJsonValue,
+            geometry: it.geometry as unknown as Prisma.InputJsonValue,
           },
         });
       }
@@ -150,7 +150,10 @@ export class CadService {
   async markParseFailed(drawingId: string, reason: string) {
     await this.prisma.cADDrawing.update({
       where: { id: drawingId },
-      data: { status: 'failed', geojson: { error: reason } as Prisma.InputJsonValue },
+      data: {
+        status: 'failed',
+        geojson: { error: reason } as unknown as Prisma.InputJsonValue,
+      },
     });
   }
 
@@ -159,7 +162,7 @@ export class CadService {
       where: { id: drawingId },
       data: {
         status: 'review',
-        geojson: { entities } as Prisma.InputJsonValue,
+        geojson: { entities } as unknown as Prisma.InputJsonValue,
         svgKey: svgKey ?? null,
       },
     });

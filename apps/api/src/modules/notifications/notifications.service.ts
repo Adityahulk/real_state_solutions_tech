@@ -41,7 +41,7 @@ export class NotificationsService {
           userId,
           channel,
           templateKey: opts.templateKey,
-          payload: opts.payload as Prisma.InputJsonValue,
+          payload: opts.payload as unknown as Prisma.InputJsonValue,
           status: 'queued',
         })),
       ),

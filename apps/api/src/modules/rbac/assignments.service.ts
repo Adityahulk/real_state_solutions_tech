@@ -19,7 +19,7 @@ export class AssignmentsService {
     if (!role) throw new NotFoundException('Role not found');
 
     const scope: Prisma.InputJsonValue | typeof Prisma.JsonNull = (input.scope ??
-      Prisma.JsonNull) as Prisma.InputJsonValue;
+      Prisma.JsonNull) as unknown as Prisma.InputJsonValue;
     try {
       const assignment = await this.prisma.userRoleAssignment.create({
         data: {
@@ -36,7 +36,7 @@ export class AssignmentsService {
           targetUserId: input.userId,
           targetRoleId: input.roleId,
           payload: input.scope
-            ? (input.scope as Prisma.InputJsonValue)
+            ? (input.scope as unknown as Prisma.InputJsonValue)
             : Prisma.JsonNull,
         },
       });

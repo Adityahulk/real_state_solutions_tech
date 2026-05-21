@@ -152,7 +152,7 @@ export class RolesService {
         data: perms.map((p) => ({
           roleId,
           permissionId: byKey.get(keyOf(p.subject, p.action))!.id,
-          conditions: (p.conditions ?? Prisma.JsonNull) as Prisma.InputJsonValue,
+          conditions: (p.conditions ?? Prisma.JsonNull) as unknown as Prisma.InputJsonValue,
         })),
       });
     }
