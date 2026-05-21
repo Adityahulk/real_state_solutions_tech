@@ -1,12 +1,16 @@
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 
-export default async function Home() {
+/**
+ * Role-aware redirect. Logged-in users hit `/dashboard` (or get redirected
+ * here from the marketing site's "Go to console" link) and land on the
+ * surface that matches their primary role.
+ */
+export default async function Dashboard() {
   const jar = await cookies();
   const access = jar.get('rest_access')?.value;
   if (!access) redirect('/login');
 
-  // Decide landing by role
   const upstream = process.env.API_URL ?? 'http://localhost:4000';
   const res = await fetch(`${upstream}/api/me/abilities`, {
     headers: { authorization: `Bearer ${access}` },
