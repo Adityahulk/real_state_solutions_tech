@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter @rest/shared-types build && nest build",
-    "dev": "pnpm --filter @rest/shared-types build && nest start --watch --tsc",
+    "build": "pnpm --filter @rest/shared-types build && tsc -p tsconfig.build.json",
+    "dev": "pnpm --filter @rest/shared-types build && node --watch -r ts-node/register -r tsconfig-paths/register src/main.ts",
     "start": "node dist/main.js",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -51,6 +51,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.2",
     "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
     "ts-loader": "^9.5.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.6.2",
