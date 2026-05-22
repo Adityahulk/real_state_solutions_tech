@@ -56,7 +56,7 @@ export class StorageService {
   }) {
     const safe = opts.filename.replace(/[^a-zA-Z0-9._-]+/g, '_');
     const key = `${opts.prefix}/${randomUUID()}-${safe}`;
-    const url = await getSignedUrl(
+    const rawUrl = await getSignedUrl(
       this.presignClient,
       new PutObjectCommand({
         Bucket: this.bucket,
@@ -65,6 +65,14 @@ export class StorageService {
       }),
       { expiresIn: opts.ttlSeconds ?? 600 },
     );
+    // If S3_ENDPOINT is an internal address (e.g. localhost) and
+    // S3_PUBLIC_ENDPOINT is set, rewrite the URL so the browser hits
+    // the public address instead of the server's loopback.
+    const internalEndpoint = (process.env.S3_ENDPOINT ?? '').replace(/\/$/, '');
+    const publicEndpoint = (process.env.S3_PUBLIC_ENDPOINT ?? internalEndpoint).replace(/\/$/, '');
+    const url = internalEndpoint && publicEndpoint !== internalEndpoint
+      ? rawUrl.replace(internalEndpoint, publicEndpoint)
+      : rawUrl;
     return { url, key, publicUrl: this.publicUrl(key) };
   }
 
@@ -75,11 +83,16 @@ export class StorageService {
   }
 
   async signedGet(key: string, ttlSeconds = 300) {
-    return getSignedUrl(
+    const rawUrl = await getSignedUrl(
       this.presignClient,
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
       { expiresIn: ttlSeconds },
     );
+    const internalEndpoint = (process.env.S3_ENDPOINT ?? '').replace(/\/$/, '');
+    const publicEndpoint = (process.env.S3_PUBLIC_ENDPOINT ?? internalEndpoint).replace(/\/$/, '');
+    return internalEndpoint && publicEndpoint !== internalEndpoint
+      ? rawUrl.replace(internalEndpoint, publicEndpoint)
+      : rawUrl;
   }
 
   async exists(key: string): Promise<boolean> {
