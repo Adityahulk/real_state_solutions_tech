@@ -105,7 +105,7 @@ export class CadService {
         });
         if (existing) {
           await tx.$executeRawUnsafe(
-            `UPDATE "Plot" SET geometry = ST_SetSRID(ST_GeomFromGeoJSON($1), 0), "areaSqft" = $2 WHERE id = $3`,
+            `UPDATE "Plot" SET geometry = ST_SetSRID(ST_GeomFromGeoJSON($1), 0), "areaSqft" = $2 WHERE id = $3::uuid`,
             geom,
             it.areaSqft ?? null,
             existing.id,
@@ -119,7 +119,7 @@ export class CadService {
             },
           });
           await tx.$executeRawUnsafe(
-            `UPDATE "Plot" SET geometry = ST_SetSRID(ST_GeomFromGeoJSON($1), 0) WHERE id = $2`,
+            `UPDATE "Plot" SET geometry = ST_SetSRID(ST_GeomFromGeoJSON($1), 0) WHERE id = $2::uuid`,
             geom,
             created.id,
           );
