@@ -12,19 +12,35 @@ import { randomUUID } from 'node:crypto';
 export class StorageService {
   private readonly log = new Logger(StorageService.name);
   private readonly client: S3Client;
+  // Separate client for presigned URLs — uses the public-facing endpoint so
+  // the browser can reach it. S3_PUBLIC_ENDPOINT defaults to S3_ENDPOINT.
+  private readonly presignClient: S3Client;
   private readonly bucket = process.env.S3_BUCKET ?? 'rest-dev';
 
   constructor() {
+    const credentials = process.env.S3_ACCESS_KEY
+      ? {
+          accessKeyId: process.env.S3_ACCESS_KEY,
+          secretAccessKey: process.env.S3_SECRET_KEY ?? '',
+        }
+      : undefined;
+
+    // Internal client — used for server-side put/get/head (localhost is fine).
     this.client = new S3Client({
       endpoint: process.env.S3_ENDPOINT,
       region: process.env.S3_REGION ?? 'auto',
-      forcePathStyle: !!process.env.S3_ENDPOINT, // MinIO needs path style
-      credentials: process.env.S3_ACCESS_KEY
-        ? {
-            accessKeyId: process.env.S3_ACCESS_KEY,
-            secretAccessKey: process.env.S3_SECRET_KEY ?? '',
-          }
-        : undefined,
+      forcePathStyle: !!process.env.S3_ENDPOINT,
+      credentials,
+    });
+
+    // Presign client — the endpoint embedded in the signed URL must be
+    // reachable from the browser, so use S3_PUBLIC_ENDPOINT when set.
+    const publicEndpoint = process.env.S3_PUBLIC_ENDPOINT ?? process.env.S3_ENDPOINT;
+    this.presignClient = new S3Client({
+      endpoint: publicEndpoint,
+      region: process.env.S3_REGION ?? 'auto',
+      forcePathStyle: !!publicEndpoint,
+      credentials,
     });
   }
 
@@ -41,7 +57,7 @@ export class StorageService {
     const safe = opts.filename.replace(/[^a-zA-Z0-9._-]+/g, '_');
     const key = `${opts.prefix}/${randomUUID()}-${safe}`;
     const url = await getSignedUrl(
-      this.client,
+      this.presignClient,
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: key,
@@ -60,7 +76,7 @@ export class StorageService {
 
   async signedGet(key: string, ttlSeconds = 300) {
     return getSignedUrl(
-      this.client,
+      this.presignClient,
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
       { expiresIn: ttlSeconds },
     );

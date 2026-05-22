@@ -87,12 +87,15 @@ JWT_SECRET=change-me-to-a-random-32-char-string-now
 NEXTAUTH_SECRET=change-me-to-another-random-32-char-string
 
 # === Storage (MinIO running locally) ===
+# Internal endpoint — used for server-side API → MinIO communication
 S3_ENDPOINT=http://localhost:9000
+# Public endpoint — embedded in presigned URLs returned to the browser.
+# MUST be the public IP/domain, not localhost.
+S3_PUBLIC_ENDPOINT=http://64.227.140.244:9000
 S3_REGION=us-east-1
 S3_BUCKET=rest-dev
 S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin
-# Replace with your droplet IP
 S3_PUBLIC_BASE_URL=http://64.227.140.244:9000/rest-dev
 
 # === App URLs (replace with your droplet IP) ===
