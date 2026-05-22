@@ -170,7 +170,7 @@ ok "API built"
 # 8. Run DB migrations + seed
 # ---------------------------------------------------------------------------
 log "Running database migrations..."
-cd "$REPO_ROOT/apps/api"
+cd "$REPO_ROOT/packages/db"
 npx prisma migrate deploy
 ok "Migrations done"
 
