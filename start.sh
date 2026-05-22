@@ -19,11 +19,9 @@ die()  { echo -e "\033[1;31m✗ $*\033[0m"; exit 1; }
 # ---------------------------------------------------------------------------
 if [ -z "$DEPLOY_ONLY" ]; then
   log "Installing system dependencies..."
-
   apt-get update -qq
   apt-get install -y -qq curl git ufw
 
-  # Docker
   if ! command -v docker &>/dev/null; then
     curl -fsSL https://get.docker.com | sh
     ok "Docker installed"
@@ -31,7 +29,6 @@ if [ -z "$DEPLOY_ONLY" ]; then
     ok "Docker already installed"
   fi
 
-  # Node 20
   if ! command -v node &>/dev/null || [[ "$(node -v)" != v20* ]]; then
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
     apt-get install -y nodejs
@@ -40,7 +37,6 @@ if [ -z "$DEPLOY_ONLY" ]; then
     ok "Node $(node -v) already installed"
   fi
 
-  # pnpm
   if ! command -v pnpm &>/dev/null; then
     npm install -g pnpm
     ok "pnpm installed"
@@ -48,7 +44,6 @@ if [ -z "$DEPLOY_ONLY" ]; then
     ok "pnpm already installed"
   fi
 
-  # PM2
   if ! command -v pm2 &>/dev/null; then
     npm install -g pm2
     ok "PM2 installed"
@@ -64,7 +59,6 @@ log "Starting infrastructure containers (Postgres, Redis, MinIO)..."
 docker compose -f "$REPO_ROOT/infra/docker-compose.dev.yml" up -d
 ok "Infrastructure running"
 
-# Wait for Postgres to be ready
 log "Waiting for Postgres..."
 until docker exec rest_postgres pg_isready -U rest -d rest_dev &>/dev/null; do
   sleep 1
@@ -80,17 +74,12 @@ WEB_ENV="$REPO_ROOT/apps/web/.env.local"
 if [ ! -f "$API_ENV" ]; then
   log "Creating apps/api/.env with defaults..."
   cat > "$API_ENV" <<'EOF'
-# === REQUIRED — edit before going live ===
 DATABASE_URL=postgresql://rest:rest@localhost:5432/rest_dev
 REDIS_URL=redis://localhost:6379
 JWT_SECRET=change-me-to-a-random-32-char-string-now
 NEXTAUTH_SECRET=change-me-to-another-random-32-char-string
 
-# === Storage (MinIO running locally) ===
-# Internal endpoint — used for server-side API → MinIO communication
 S3_ENDPOINT=http://localhost:9000
-# Public endpoint — embedded in presigned URLs returned to the browser.
-# MUST be the public IP/domain, not localhost.
 S3_PUBLIC_ENDPOINT=http://64.227.140.244:9000
 S3_REGION=us-east-1
 S3_BUCKET=rest-dev
@@ -98,17 +87,14 @@ S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin
 S3_PUBLIC_BASE_URL=http://64.227.140.244:9000/rest-dev
 
-# === App URLs (replace with your droplet IP) ===
 API_URL=http://localhost:4000
 NEXT_PUBLIC_API_URL=http://64.227.140.244:4000
 WEB_ORIGIN=http://64.227.140.244:3000
 NEXTAUTH_URL=http://64.227.140.244:3000
 
-# === Branding ===
 ORG_NAME=Rest
 ORG_EMAIL=noreply@example.com
 
-# === Optional (leave blank for sandbox/stub mode) ===
 RAZORPAY_KEY_ID=
 RAZORPAY_KEY_SECRET=
 RAZORPAY_WEBHOOK_SECRET=
@@ -121,7 +107,7 @@ MUX_TOKEN_SECRET=
 APS_CLIENT_ID=
 APS_CLIENT_SECRET=
 EOF
-  ok "Created apps/api/.env — edit S3_PUBLIC_BASE_URL and URLs if needed"
+  ok "Created apps/api/.env"
 else
   ok "apps/api/.env already exists, skipping"
 fi
@@ -170,12 +156,26 @@ pnpm build
 ok "API built"
 
 # ---------------------------------------------------------------------------
-# 8. Run DB migrations + seed
+# 8. Apply DB schema + seed
+# Load API env vars so prisma can find DATABASE_URL regardless of CWD.
 # ---------------------------------------------------------------------------
-log "Applying database schema (prisma db push)..."
+log "Loading env vars for DB setup..."
+set -a
+# shellcheck disable=SC1090
+source "$API_ENV"
+set +a
+
+log "Installing PostGIS extension directly (guarantees it exists)..."
+docker exec rest_postgres psql -U rest -d rest_dev \
+  -c "CREATE EXTENSION IF NOT EXISTS postgis;" \
+  -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;" \
+  -c "CREATE EXTENSION IF NOT EXISTS citext;" \
+  -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";" \
+  2>&1 | grep -v "^$" || true
+ok "Extensions installed"
+
+log "Applying database schema..."
 cd "$REPO_ROOT/packages/db"
-# No migration files in this repo — use db push which also creates
-# the postgis / pgcrypto / citext extensions declared in schema.prisma.
 npx prisma db push --accept-data-loss
 ok "Schema applied"
 
@@ -208,18 +208,17 @@ pm2 delete all 2>/dev/null || true
 pm2 start ecosystem.config.js
 pm2 save
 
-# Survive reboots
-pm2 startup systemd -u root --hp /root 2>/dev/null | grep "sudo" | bash || true
-ok "PM2 services started"
+pm2 startup systemd -u root --hp /root 2>/dev/null | grep "sudo env" | bash || true
+ok "PM2 services started and configured for reboot"
 
 # ---------------------------------------------------------------------------
 # 12. Open firewall
 # ---------------------------------------------------------------------------
 log "Opening firewall ports..."
-ufw allow 22/tcp   # SSH — never lock yourself out
-ufw allow 3000/tcp # Web
-ufw allow 4000/tcp # API
-ufw allow 9000/tcp # MinIO (S3)
+ufw allow 22/tcp
+ufw allow 3000/tcp
+ufw allow 4000/tcp
+ufw allow 9000/tcp
 ufw --force enable
 ok "Firewall configured"
 

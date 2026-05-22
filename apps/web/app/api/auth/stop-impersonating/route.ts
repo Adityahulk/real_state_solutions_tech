@@ -18,19 +18,16 @@ export async function POST(req: NextRequest) {
   const isHttps =
     req.headers.get('x-forwarded-proto') === 'https' ||
     req.nextUrl.protocol === 'https:';
+  const origin = new URL(req.url).origin;
   if (!origA || !origR) {
-    const r = NextResponse.redirect(
-      new URL('/login', process.env.NEXTAUTH_URL ?? 'http://localhost:3000'),
-    );
+    const r = NextResponse.redirect(new URL('/login', origin));
     r.cookies.delete(ACCESS);
     r.cookies.delete(REFRESH);
     r.cookies.delete(ORIGINAL_ACCESS);
     r.cookies.delete(ORIGINAL_REFRESH);
     return r;
   }
-  const res = NextResponse.redirect(
-    new URL('/', process.env.NEXTAUTH_URL ?? 'http://localhost:3000'),
-  );
+  const res = NextResponse.redirect(new URL('/', origin));
   res.cookies.set(ACCESS, origA, {
     httpOnly: true,
     secure: isHttps,
