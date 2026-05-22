@@ -172,10 +172,12 @@ ok "API built"
 # ---------------------------------------------------------------------------
 # 8. Run DB migrations + seed
 # ---------------------------------------------------------------------------
-log "Running database migrations..."
+log "Applying database schema (prisma db push)..."
 cd "$REPO_ROOT/packages/db"
-npx prisma migrate deploy
-ok "Migrations done"
+# No migration files in this repo — use db push which also creates
+# the postgis / pgcrypto / citext extensions declared in schema.prisma.
+npx prisma db push --accept-data-loss
+ok "Schema applied"
 
 log "Seeding database (idempotent)..."
 npx prisma db seed || true
