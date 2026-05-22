@@ -33,18 +33,22 @@ export async function POST(req: NextRequest) {
   };
 
   const res = NextResponse.json({ ok: true });
-  const isProd = process.env.NODE_ENV === 'production';
+  // Only mark cookies Secure when the request actually arrived over HTTPS.
+  // On plain-HTTP deployments (IP-only, no TLS) setting Secure causes the
+  // browser to silently drop the cookie, breaking login entirely.
+  const isHttps =
+    req.headers.get('x-forwarded-proto') === 'https' ||
+    req.nextUrl.protocol === 'https:';
   res.cookies.set(ACCESS_COOKIE, accessToken, {
     httpOnly: true,
-    secure: isProd,
+    secure: isHttps,
     sameSite: 'lax',
     path: '/',
-    // access token TTL is short — let it ride the upstream JWT expiry
     maxAge: 60 * 15,
   });
   res.cookies.set(REFRESH_COOKIE, refreshToken, {
     httpOnly: true,
-    secure: isProd,
+    secure: isHttps,
     sameSite: 'lax',
     path: '/',
     expires: new Date(expiresAt),

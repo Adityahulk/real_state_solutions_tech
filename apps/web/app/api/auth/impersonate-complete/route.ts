@@ -51,13 +51,15 @@ export async function POST(req: NextRequest) {
   };
 
   const res = NextResponse.json({ ok: true });
-  const isProd = process.env.NODE_ENV === 'production';
+  const isHttps =
+    req.headers.get('x-forwarded-proto') === 'https' ||
+    req.nextUrl.protocol === 'https:';
 
   // Stash original tokens so the admin can restore.
   if (adminAccess) {
     res.cookies.set(ORIGINAL_ACCESS, adminAccess, {
       httpOnly: true,
-      secure: isProd,
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60,
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest) {
   if (adminRefresh) {
     res.cookies.set(ORIGINAL_REFRESH, adminRefresh, {
       httpOnly: true,
-      secure: isProd,
+      secure: isHttps,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 30,
@@ -75,14 +77,14 @@ export async function POST(req: NextRequest) {
   // Swap in the impersonation tokens.
   res.cookies.set(ACCESS_COOKIE, accessToken, {
     httpOnly: true,
-    secure: isProd,
+    secure: isHttps,
     sameSite: 'lax',
     path: '/',
     maxAge: 60 * 15,
   });
   res.cookies.set(REFRESH_COOKIE, refreshToken, {
     httpOnly: true,
-    secure: isProd,
+    secure: isHttps,
     sameSite: 'lax',
     path: '/',
     expires: new Date(expiresAt),
