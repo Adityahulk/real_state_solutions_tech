@@ -12,6 +12,7 @@ const nextConfig = {
   experimental: {
     scrollRestoration: true,
     optimizePackageImports: ['lucide-react', '@tanstack/react-query'],
+    typedRoutes: false,
   },
   transpilePackages: ['@rest/shared-types'],
   // Emit a minimal `.next/standalone/` server bundle so the production image

@@ -96,7 +96,7 @@ export function PlotPanel({ plotId, audience }: Props) {
           <p className="text-sm text-slate-500">No active allotment.</p>
           {audience === 'admin' && (
             <Link
-              href={`/admin/plots/${p.id}/allot`}
+              href={`/admin/plots/${p.id}/allot` as any}
               className="mt-2 inline-flex items-center gap-1.5 text-sm rounded-md bg-brand-500 text-white px-3 py-1.5 hover:bg-brand-700"
             >
               <PenSquare className="w-3.5 h-3.5" />
@@ -229,7 +229,7 @@ function Section({
 function PrimaryAction({ href, label }: { href: string; label: string }) {
   return (
     <Link
-      href={href}
+      href={href as any}
       className="rounded-md bg-brand-500 text-white px-3 py-2 text-sm font-medium hover:bg-brand-700 flex items-center justify-between"
     >
       {label}
@@ -249,7 +249,7 @@ function SecondaryAction({
 }) {
   return (
     <Link
-      href={href}
+      href={href as any}
       className="rounded-md border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50 flex items-center justify-between"
     >
       <span className="flex items-center gap-2 text-slate-700">
